@@ -41,17 +41,13 @@ export function UbiGoNavbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="ghost"
-                className="text-zinc-300 hover:text-white hover:bg-white/5 font-bold text-[11px] tracking-widest h-9 px-4 rounded-lg transition-all">
-                INICIAR SESIÓN
-              </Button>
-            </Link>
-            <Link href="/registro">
-              <Button className="bg-red-600 hover:bg-red-500 text-white rounded-full px-6 h-9 font-bold text-[11px] tracking-wide shadow-[0_0_20px_rgba(220,38,38,0.35)] hover:shadow-[0_0_28px_rgba(220,38,38,0.55)] transition-all">
-                Registrarse
-              </Button>
-            </Link>
+            <Button variant="ghost"
+              className="text-zinc-300 hover:text-white hover:bg-white/5 font-bold text-[11px] tracking-widest h-9 px-4 rounded-lg transition-all">
+              INICIAR SESIÓN
+            </Button>
+            <Button className="bg-red-600 hover:bg-red-500 text-white rounded-full px-6 h-9 font-bold text-[11px] tracking-wide shadow-[0_0_20px_rgba(220,38,38,0.35)] hover:shadow-[0_0_28px_rgba(220,38,38,0.55)] transition-all">
+              Registrarse
+            </Button>
           </div>
 
           <button
@@ -84,17 +80,15 @@ export function UbiGoNavbar() {
                 </Link>
               ))}
               <div className="pt-3 grid grid-cols-2 gap-3">
-                <Link href="/login" onClick={() => setIsOpen(false)}>
-                  <Button variant="outline"
-                    className="w-full border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white font-bold h-11 rounded-xl text-sm">
-                    Iniciar sesión
-                  </Button>
-                </Link>
-                <Link href="/registro" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full bg-red-600 hover:bg-red-500 text-white font-bold h-11 rounded-xl text-sm shadow-[0_0_20px_rgba(220,38,38,0.4)]">
-                    Registrarse
-                  </Button>
-                </Link>
+                <Button variant="outline"
+                  className="w-full border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white font-bold h-11 rounded-xl text-sm"
+                  onClick={() => setIsOpen(false)}>
+                  Iniciar sesión
+                </Button>
+                <Button className="w-full bg-red-600 hover:bg-red-500 text-white font-bold h-11 rounded-xl text-sm shadow-[0_0_20px_rgba(220,38,38,0.4)]"
+                  onClick={() => setIsOpen(false)}>
+                  Registrarse
+                </Button>
               </div>
             </div>
           </motion.div>
