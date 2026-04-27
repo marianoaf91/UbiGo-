@@ -31,7 +31,7 @@ export function UbiGoNavbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-10 text-[11px] font-bold tracking-[0.18em]">
-            {[["#pide-tu-viaje","PIDE TU VIAJE"],["#precios","PRECIOS"],["#contacto","CONTACTO"]].map(([href, label]) => (
+            {[["#pide-tu-viaje","PIDE TU VIAJE"],["#precios","PRECIOS"],["#contacto","CONTACTO"],["#servicios","RESERVA"]].map(([href, label]) => (
               <Link key={href} href={href}
                 className="relative text-zinc-400 hover:text-white transition-colors duration-200 group">
                 {label}
@@ -75,7 +75,7 @@ export function UbiGoNavbar() {
             className="md:hidden bg-zinc-950/95 backdrop-blur-xl border-b border-white/5 overflow-hidden"
           >
             <div className="px-5 pt-3 pb-6 space-y-1">
-              {[["#pide-tu-viaje","Pide tu viaje"],["#precios","Precios"],["#contacto","Contacto"]].map(([href, label]) => (
+              {[["#pide-tu-viaje","Pide tu viaje"],["#precios","Precios"],["#contacto","Contacto"],["#servicios","Reserva"]].map(([href, label]) => (
                 <Link key={href} href={href}
                   className="flex items-center justify-between px-4 py-3.5 text-base font-semibold text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
                   onClick={() => setIsOpen(false)}>
