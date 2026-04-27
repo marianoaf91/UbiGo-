@@ -1,312 +1,1126 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UbiGo! - Viaja con Libertad</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .selection-red::selection {
-            background-color: #dc2626;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UbiGo! - Viaja con Planificación</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000;
+      color: #fff;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 50;
+      transition: all 0.3s;
+    }
+    nav.scrolled {
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 2px 40px rgba(0,0,0,0.6);
+    }
+    .nav-inner {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 80px;
+    }
+    .nav-logo { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.05em; color: #fff; }
+    .nav-logo span { color: #ef4444; }
+    .nav-links { display: flex; gap: 2.5rem; align-items: center; }
+    .nav-links a {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
+      color: #a1a1aa; transition: color 0.2s; text-transform: uppercase; position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 1px; background: #ef4444; transition: width 0.3s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-actions { display: flex; gap: 1rem; align-items: center; }
+    .btn-ghost {
+      color: #d4d4d8; font-weight: 700; font-size: 11px; letter-spacing: 0.1em;
+      padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .btn-ghost:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .btn-red {
+      background: #dc2626; color: #fff; border-radius: 999px;
+      padding: 0.5rem 1.5rem; font-weight: 700; font-size: 11px; letter-spacing: 0.05em;
+      box-shadow: 0 0 20px rgba(220,38,38,0.35); transition: all 0.2s;
+    }
+    .btn-red:hover { background: #ef4444; box-shadow: 0 0 28px rgba(220,38,38,0.55); }
+    .nav-mobile-btn { display: none; padding: 0.5rem; color: #fff; border-radius: 8px; transition: background 0.2s; }
+    .nav-mobile-btn:hover { background: rgba(255,255,255,0.1); }
+    .nav-mobile-menu {
+      display: none; background: rgba(9,9,11,0.95); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .nav-mobile-menu.open { display: block; }
+    .nav-mobile-menu-inner { padding: 0.75rem 1.25rem 1.5rem; }
+    .nav-mobile-link {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.875rem 1rem; font-size: 1rem; font-weight: 600;
+      color: #a1a1aa; border-radius: 12px; transition: all 0.2s;
+    }
+    .nav-mobile-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .nav-mobile-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding-top: 0.75rem; }
+    .btn-outline-mobile {
+      width: 100%; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+      color: #fff; font-weight: 700; height: 44px; border-radius: 12px; font-size: 0.875rem;
+      transition: background 0.2s;
+    }
+    .btn-outline-mobile:hover { background: rgba(255,255,255,0.1); }
+    .btn-red-mobile {
+      width: 100%; background: #dc2626; color: #fff; font-weight: 700;
+      height: 44px; border-radius: 12px; font-size: 0.875rem;
+      box-shadow: 0 0 20px rgba(220,38,38,0.4); transition: background 0.2s;
+    }
+    .btn-red-mobile:hover { background: #ef4444; }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative; min-height: 100vh; background: #09090b;
+      overflow: hidden; display: flex; align-items: center;
+    }
+    .hero-glows { position: absolute; inset: 0; pointer-events: none; }
+    .hero-glow-1 {
+      position: absolute; top: -10%; right: -5%; width: 60%; height: 70%;
+      background: rgba(220,38,38,0.08); border-radius: 50%; filter: blur(140px);
+    }
+    .hero-glow-2 {
+      position: absolute; bottom: -10%; left: -5%; width: 50%; height: 60%;
+      background: rgba(220,38,38,0.06); border-radius: 50%; filter: blur(120px);
+    }
+    .hero-glow-3 {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 40%; height: 40%; background: rgba(127,29,29,0.05); border-radius: 50%; filter: blur(100px);
+    }
+    .hero-inner {
+      max-width: 1280px; margin: 0 auto; padding: 7rem 2.5rem 5rem;
+      width: 100%; position: relative; z-index: 10;
+    }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: center; }
+    .hero-card {
+      position: relative; border-radius: 16px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+    }
+    .hero-card-glow {
+      position: absolute; inset: 0; background: rgba(220,38,38,0.2);
+      border-radius: 24px; filter: blur(50px); transform: scale(0.95) translateY(4%);
+    }
+    .hero-card img { width: 100%; display: block; object-fit: cover; }
+    .hero-caption {
+      position: relative; background: #18181b; padding: 1.5rem 1.75rem;
+      border-top: 1px solid rgba(255,255,255,0.05); overflow: hidden;
+    }
+    .hero-caption-inner { display: flex; align-items: flex-end; justify-content: space-between; }
+    .hero-caption-title {
+      font-size: 2rem; font-weight: 900; font-style: italic;
+      letter-spacing: -0.04em; line-height: 1; color: #fff;
+    }
+    .hero-caption-title span { color: #ef4444; }
+    .hero-caption-sub { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.75rem; }
+    .hero-caption-line { height: 2px; width: 2rem; background: #ef4444; }
+    .hero-caption-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.3em; color: #52525b;
+    }
+    .hero-live { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .hero-live-dot {
+      width: 2.5rem; height: 2.5rem; border-radius: 50%;
+      background: rgba(220,38,38,0.15); border: 1px solid rgba(239,68,68,0.3);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-live-dot-inner {
+      width: 10px; height: 10px; border-radius: 50%; background: #ef4444;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(0.9)} }
+    .hero-live-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #3f3f46; }
+    .hero-shimmer {
+      position: absolute; top: 0; left: -300px; width: 4rem; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+      transform: skewX(-12deg); animation: shimmer 6s linear infinite;
+    }
+    @keyframes shimmer { to { left: 700px; } }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(220,38,38,0.1); border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 999px; padding: 0.375rem 1rem; margin-bottom: 1.5rem;
+    }
+    .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #ef4444; animation: pulse 2s infinite; }
+    .hero-badge-text { color: #f87171; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; }
+    .hero-h1 {
+      font-size: clamp(3rem, 5vw, 4.5rem); font-weight: 900; color: #fff;
+      line-height: 0.95; letter-spacing: -0.04em; margin-bottom: 1.25rem;
+    }
+    .hero-h1-gradient {
+      background: linear-gradient(to right, #ef4444, #f87171);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-desc { font-size: 1rem; color: #a1a1aa; margin-bottom: 2rem; max-width: 24rem; line-height: 1.625; }
+    .booking-card {
+      background: rgba(255,255,255,0.04); backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4); max-width: 28rem;
+    }
+    .booking-card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; }
+    .booking-card-bar { width: 4px; height: 20px; background: #ef4444; border-radius: 2px; }
+    .booking-card-title { color: #fff; font-size: 1.125rem; font-weight: 700; }
+    .booking-field {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; overflow: hidden; margin-bottom: 0.75rem; transition: border-color 0.2s;
+    }
+    .booking-field:focus-within { border-color: rgba(239,68,68,0.5); }
+    .booking-input-wrap { position: relative; display: flex; align-items: center; }
+    .booking-input-icon { position: absolute; left: 12px; pointer-events: none; line-height: 0; }
+    .booking-input {
+      width: 100%; height: 56px; padding: 0 1rem 0 2.75rem;
+      background: transparent; border: none; outline: none;
+      color: #fff; font-size: 0.9rem; font-family: inherit;
+    }
+    .booking-input::placeholder { color: #71717a; }
+    .btn-book {
+      width: 100%; height: 48px; background: #dc2626; color: #fff;
+      font-weight: 700; font-size: 0.875rem; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      box-shadow: 0 0 24px rgba(220,38,38,0.4); transition: all 0.2s; margin-top: 0.25rem;
+    }
+    .btn-book:hover { background: #ef4444; box-shadow: 0 0 32px rgba(220,38,38,0.6); }
+    .btn-book:active { transform: scale(0.98); }
+    .trust-signals { display: flex; gap: 1.5rem; margin-top: 1.5rem; }
+    .trust-item { text-align: center; }
+    .trust-val { color: #fff; font-weight: 900; font-size: 0.875rem; }
+    .trust-label { color: #3f3f46; font-size: 10px; line-height: 1.3; }
+
+    /* ─── SERVICES ─── */
+    .services {
+      padding: 7rem 0; background: #09090b; position: relative; overflow: hidden;
+    }
+    .services-glow-1 {
+      position: absolute; top: 0; right: 0; width: 600px; height: 600px;
+      background: rgba(220,38,38,0.06); border-radius: 50%; filter: blur(160px); pointer-events: none;
+    }
+    .services-glow-2 {
+      position: absolute; bottom: 0; left: 0; width: 500px; height: 500px;
+      background: rgba(220,38,38,0.04); border-radius: 50%; filter: blur(140px); pointer-events: none;
+    }
+    .section-inner { max-width: 1280px; margin: 0 auto; padding: 0 2.5rem; position: relative; z-index: 10; }
+    .section-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(220,38,38,0.1); border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 999px; padding: 0.375rem 1rem; margin-bottom: 1.5rem;
+    }
+    .section-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #ef4444; }
+    .section-badge-text { color: #f87171; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; }
+    .section-h2 {
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; color: #fff;
+      letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 1.25rem;
+    }
+    .section-h2 span { color: #ef4444; }
+    .section-desc { color: #a1a1aa; font-size: 1rem; line-height: 1.625; }
+    .services-header { max-width: 36rem; margin-bottom: 5rem; }
+    .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+    .steps { display: flex; flex-direction: column; gap: 1.5rem; }
+    .step { display: flex; gap: 1.25rem; }
+    .step-num {
+      flex-shrink: 0; width: 48px; height: 48px; border-radius: 16px;
+      background: #18181b; border: 1px solid rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 0.875rem; color: #ef4444; transition: all 0.2s;
+    }
+    .step:hover .step-num { background: rgba(220,38,38,0.1); border-color: rgba(239,68,68,0.3); }
+    .step-title { color: #fff; font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
+    .step-desc { color: #71717a; font-size: 0.875rem; line-height: 1.625; }
+    .btn-book-now {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: #dc2626; color: #fff; font-weight: 700; font-size: 0.875rem;
+      height: 48px; padding: 0 1.75rem; border-radius: 12px; margin-top: 1rem;
+      box-shadow: 0 0 24px rgba(220,38,38,0.4); transition: all 0.2s;
+    }
+    .btn-book-now:hover { background: #ef4444; box-shadow: 0 0 36px rgba(220,38,38,0.6); }
+    .btn-book-now:active { transform: scale(0.98); }
+    .feature-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .feature-card {
+      background: rgba(24,24,27,0.5); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px; padding: 1.25rem; transition: all 0.2s;
+    }
+    .feature-card:hover { border-color: rgba(239,68,68,0.25); background: rgba(24,24,27,0.8); }
+    .feature-icon {
+      width: 36px; height: 36px; border-radius: 12px;
+      background: rgba(220,38,38,0.1); border: 1px solid rgba(239,68,68,0.2);
+      display: flex; align-items: center; justify-content: center; color: #ef4444;
+      margin-bottom: 1rem; transition: background 0.2s;
+    }
+    .feature-card:hover .feature-icon { background: rgba(220,38,38,0.2); }
+    .feature-title { color: #fff; font-weight: 700; font-size: 0.875rem; margin-bottom: 0.25rem; }
+    .feature-desc { color: #71717a; font-size: 0.75rem; line-height: 1.5; }
+
+    /* ─── PRICING ─── */
+    .pricing {
+      padding: 7rem 0; background: #18181b; position: relative; overflow: hidden;
+    }
+    .pricing::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at top, rgba(220,38,38,0.06) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .pricing-header { text-align: center; max-width: 36rem; margin: 0 auto 4rem; }
+    .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: 48rem; margin: 0 auto; }
+    .pricing-card {
+      position: relative; border-radius: 16px; padding: 1.75rem; border: 1px solid;
+      transition: all 0.2s;
+    }
+    .pricing-card.normal { background: rgba(24,24,27,0.4); border-color: rgba(255,255,255,0.08); }
+    .pricing-card.normal:hover { border-color: rgba(255,255,255,0.15); }
+    .pricing-card.highlight { background: rgba(24,24,27,0.8); border-color: rgba(239,68,68,0.4); box-shadow: 0 0 60px rgba(220,38,38,0.15); }
+    .pricing-tag {
+      position: absolute; top: -12px; left: 24px;
+      background: #dc2626; color: #fff; font-size: 10px; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 0.15em; padding: 4px 12px; border-radius: 999px;
+      box-shadow: 0 0 16px rgba(220,38,38,0.5);
+    }
+    .pricing-tag-small {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em;
+      color: #3f3f46; border: 1px solid #3f3f46; border-radius: 999px; padding: 4px 10px;
+    }
+    .pricing-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; }
+    .pricing-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(220,38,38,0.1); border: 1px solid rgba(239,68,68,0.2);
+      display: flex; align-items: center; justify-content: center; color: #ef4444; transition: background 0.2s;
+    }
+    .pricing-card:hover .pricing-icon { background: rgba(220,38,38,0.2); }
+    .pricing-name { color: #fff; font-weight: 900; font-size: 1.25rem; margin-bottom: 0.25rem; }
+    .pricing-desc { color: #71717a; font-size: 0.875rem; margin-bottom: 1.25rem; line-height: 1.5; }
+    .pricing-price { margin-bottom: 1.5rem; }
+    .pricing-price-val { color: #fff; font-weight: 900; font-size: 1.875rem; }
+    .pricing-price-unit { color: #3f3f46; font-size: 0.875rem; margin-left: 4px; }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 0.625rem; }
+    .pricing-feature { display: flex; align-items: center; gap: 0.625rem; font-size: 0.875rem; color: #d4d4d8; }
+    .pricing-check { color: #ef4444; flex-shrink: 0; }
+    .pricing-note { text-align: center; color: #3f3f46; font-size: 0.75rem; margin-top: 2rem; }
+
+    /* ─── FOOTER ─── */
+    footer { background: #09090b; color: #fff; border-top: 1px solid rgba(255,255,255,0.05); }
+    .footer-main { max-width: 1280px; margin: 0 auto; padding: 5rem 2.5rem; }
+    .footer-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 4rem; }
+    .footer-brand-name { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.04em; }
+    .footer-brand-name span { color: #ef4444; }
+    .footer-brand-desc { color: #71717a; font-size: 0.875rem; line-height: 1.625; margin-top: 0.75rem; margin-bottom: 1.5rem; max-width: 20rem; }
+    .footer-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(220,38,38,0.1); border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 999px; padding: 0.5rem 1rem;
+    }
+    .footer-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #ef4444; animation: pulse 2s infinite; }
+    .footer-badge-text { color: #f87171; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; }
+    .footer-contact-title { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 2rem; }
+    .footer-contact-title span { color: #ef4444; }
+    .footer-contacts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .footer-contact-item {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      background: rgba(24,24,27,0.5); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px; padding: 1rem; transition: border-color 0.2s;
+    }
+    .footer-contact-item:hover { border-color: rgba(239,68,68,0.2); }
+    .footer-contact-icon {
+      width: 36px; height: 36px; border-radius: 12px;
+      background: rgba(220,38,38,0.1); border: 1px solid rgba(239,68,68,0.2);
+      display: flex; align-items: center; justify-content: center; color: #ef4444;
+      flex-shrink: 0; transition: background 0.2s; line-height: 0;
+    }
+    .footer-contact-item:hover .footer-contact-icon { background: rgba(220,38,38,0.2); }
+    .footer-contact-label { color: #71717a; font-size: 0.75rem; margin-bottom: 2px; }
+    .footer-contact-value { color: #fff; font-weight: 600; font-size: 0.875rem; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.05); }
+    .footer-bottom-inner {
+      max-width: 1280px; margin: 0 auto; padding: 1.25rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-bottom-left { display: flex; align-items: center; gap: 1.25rem; }
+    .footer-bottom-item { display: flex; align-items: center; gap: 6px; color: #71717a; font-size: 0.75rem; line-height: 0; }
+    .footer-cards { display: flex; align-items: center; gap: 1rem; color: #3f3f46; font-size: 0.75rem; font-weight: 700; font-style: italic; letter-spacing: 0.1em; }
+    .footer-copy { color: #3f3f46; font-size: 0.75rem; }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px); z-index: 100;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 24px; width: 100%; max-width: 32rem;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem; padding: 0.5rem;
+      border-radius: 50%; transition: background 0.2s; z-index: 10; line-height: 0;
+    }
+    .modal-close:hover { background: #f4f4f5; }
+    .modal-progress { padding: 1.25rem 2rem 0.75rem; }
+    .modal-steps { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    .modal-step-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .modal-step-circle {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 900; transition: all 0.2s;
+    }
+    .modal-step-circle.done { background: #dc2626; color: #fff; }
+    .modal-step-circle.active { background: #000; color: #fff; }
+    .modal-step-circle.pending { background: #f4f4f5; color: #a1a1aa; }
+    .modal-step-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .modal-step-label.active { color: #000; }
+    .modal-step-label.inactive { color: #a1a1aa; }
+    .modal-progress-bar { height: 4px; background: #f4f4f5; border-radius: 2px; }
+    .modal-progress-fill { height: 4px; background: #dc2626; border-radius: 2px; transition: width 0.5s; }
+    .modal-body { padding: 1.5rem 2rem 2rem; }
+    .modal-back { display: flex; align-items: center; gap: 4px; color: #a1a1aa; font-size: 0.875rem; margin-bottom: 1rem; transition: color 0.2s; background: none; border: none; cursor: pointer; }
+    .modal-back:hover { color: #000; }
+    .modal-h2 { font-size: 1.5rem; font-weight: 900; color: #000; margin-bottom: 0.25rem; }
+    .modal-sub { color: #a1a1aa; font-size: 0.875rem; margin-bottom: 1.25rem; }
+    .modal-calendar { background: #f9f9f9; border-radius: 16px; padding: 0.75rem; margin-bottom: 0.75rem; }
+    .modal-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .modal-cal-btn { padding: 0.5rem; border-radius: 10px; color: #a1a1aa; transition: all 0.2s; line-height: 0; }
+    .modal-cal-btn:hover { background: #e4e4e7; color: #000; }
+    .modal-cal-title { text-align: center; }
+    .modal-cal-month { font-weight: 900; font-size: 1rem; color: #000; }
+    .modal-cal-year { font-size: 0.75rem; color: #a1a1aa; }
+    .modal-cal-days { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 4px; }
+    .modal-cal-dayname { text-align: center; font-size: 10px; font-weight: 700; color: #a1a1aa; text-transform: uppercase; padding: 4px 0; }
+    .modal-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+    .modal-cal-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+    .modal-cal-day {
+      width: 32px; height: 32px; border-radius: 8px; font-size: 0.875rem; font-weight: 700;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+    }
+    .modal-cal-day.past { color: #d4d4d8; cursor: not-allowed; }
+    .modal-cal-day.today-ring { outline: 1px solid #dc2626; color: #ef4444; }
+    .modal-cal-day.available { color: #52525b; }
+    .modal-cal-day.available:hover { background: #e4e4e7; }
+    .modal-cal-day.selected { background: #dc2626; color: #fff; box-shadow: 0 0 12px rgba(220,38,38,0.4); }
+    .timepicker { margin-bottom: 0.75rem; }
+    .timepicker-label { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; line-height: 0; }
+    .timepicker-label-text { font-size: 11px; font-weight: 700; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.15em; line-height: 1.4; }
+    .timepicker-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+    .time-btn {
+      padding: 6px 4px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      transition: all 0.2s; text-align: center;
+    }
+    .time-btn.normal { background: #f9f9f9; color: #52525b; border: 1px solid #e4e4e7; }
+    .time-btn.normal:hover { background: #f4f4f5; }
+    .time-btn.selected { background: #dc2626; color: #fff; box-shadow: 0 0 10px rgba(220,38,38,0.4); border: 1px solid transparent; }
+    .route-input-wrap {
+      background: #f9f9f9; border: 1px solid transparent; border-radius: 12px;
+      display: flex; align-items: center; gap: 0.5rem; padding: 0 0.75rem;
+      margin-bottom: 0.75rem; transition: border-color 0.2s; line-height: 0;
+    }
+    .route-input-wrap:focus-within { border-color: #dc2626; }
+    .route-input {
+      flex: 1; height: 52px; background: transparent; border: none; outline: none;
+      font-size: 0.9rem; color: #000; font-family: inherit; line-height: normal;
+    }
+    .route-input::placeholder { color: #a1a1aa; }
+    .modal-stats { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .modal-stat { flex: 1; border-radius: 12px; padding: 0.75rem; text-align: center; }
+    .modal-stat.red { background: #fef2f2; }
+    .modal-stat.gray { background: #f4f4f5; }
+    .modal-stat-val { font-size: 1.25rem; font-weight: 900; }
+    .modal-stat.red .modal-stat-val { color: #dc2626; }
+    .modal-stat.gray .modal-stat-val { color: #000; }
+    .modal-stat-label { font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.08em; }
+    .tier-option {
+      border: 2px solid #e4e4e7; border-radius: 12px; padding: 1rem;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.75rem; background: #fff;
+    }
+    .tier-option:hover { border-color: #dc2626; background: #fef2f2; }
+    .tier-option-left { display: flex; align-items: center; gap: 0.75rem; }
+    .tier-icon {
+      width: 44px; height: 44px; border-radius: 12px; background: #f4f4f5;
+      display: flex; align-items: center; justify-content: center; color: #dc2626;
+      transition: background 0.2s; flex-shrink: 0; line-height: 0;
+    }
+    .tier-option:hover .tier-icon { background: #fff; }
+    .tier-name { font-weight: 700; color: #000; font-size: 0.9rem; }
+    .tier-desc { font-size: 0.75rem; color: #a1a1aa; }
+    .tier-price { font-size: 1.25rem; font-weight: 900; color: #000; }
+    .driver-card { background: #f4f4f5; border-radius: 16px; padding: 1.25rem; margin-bottom: 1rem; }
+    .driver-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .driver-avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .driver-name { font-weight: 700; color: #000; font-size: 1rem; }
+    .driver-rating { display: flex; align-items: center; gap: 4px; }
+    .driver-rating-val { font-weight: 700; color: #000; font-size: 0.875rem; }
+    .driver-rating-trips { color: #a1a1aa; font-size: 0.75rem; }
+    .driver-plates { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .driver-plate-box { background: #fff; border-radius: 12px; padding: 0.75rem; }
+    .driver-plate-label { font-size: 0.65rem; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+    .driver-plate-val { font-weight: 900; color: #000; }
+    .driver-plate-val.small { font-weight: 700; font-size: 0.875rem; }
+    .summary-box { background: #fef2f2; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; }
+    .summary-name { font-weight: 700; color: #000; font-size: 0.875rem; }
+    .summary-meta { font-size: 0.75rem; color: #a1a1aa; }
+    .summary-price { font-size: 1.5rem; font-weight: 900; color: #000; }
+    .btn-confirm {
+      width: 100%; height: 48px; background: #dc2626; color: #fff;
+      font-weight: 700; font-size: 1rem; border-radius: 12px; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .btn-confirm:hover { background: #b91c1c; }
+    .btn-confirm:active { transform: scale(0.98); }
+    .btn-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+    .modal-disclaimer { font-size: 0.75rem; color: #a1a1aa; text-align: center; margin-top: 0.75rem; }
+    .confirmed-wrap { padding: 2.5rem 2rem; text-align: center; }
+    .confirmed-icon {
+      width: 80px; height: 80px; border-radius: 50%; background: #dcfce7;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; line-height: 0;
+    }
+    .confirmed-h2 { font-size: 1.5rem; font-weight: 900; color: #000; margin-bottom: 0.5rem; }
+    .confirmed-sub { color: #a1a1aa; margin-bottom: 0.25rem; }
+    .confirmed-date { color: #dc2626; font-weight: 700; font-size: 0.875rem; margin-bottom: 1.5rem; }
+    .confirmed-driver { background: #f4f4f5; border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 1rem; text-align: left; margin-bottom: 1.5rem; }
+    .confirmed-driver-avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; }
+    .confirmed-driver-name { font-weight: 700; color: #000; }
+    .confirmed-driver-plate { color: #dc2626; font-weight: 900; }
+    .confirmed-note { font-size: 0.875rem; color: #a1a1aa; }
+    .btn-close-modal {
+      display: block; width: 100%; margin-top: 1.5rem; height: 48px;
+      background: #000; color: #fff; font-weight: 700; border-radius: 12px;
+      font-size: 1rem; transition: background 0.2s;
+    }
+    .btn-close-modal:hover { background: #27272a; }
+    .error-text { color: #f87171; font-size: 0.875rem; display: flex; align-items: center; gap: 6px; margin-top: 0.25rem; margin-bottom: 0.5rem; }
+    .error-dot { width: 4px; height: 4px; border-radius: 50%; background: #f87171; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .animate-spin { animation: spin 1s linear infinite; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .hero-grid, .services-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 24rem; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .footer-contacts { grid-template-columns: 1fr; }
+      .footer-bottom-inner { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+    @media (max-width: 768px) {
+      .nav-links, .nav-actions { display: none; }
+      .nav-mobile-btn { display: block; }
+      .nav-inner { padding: 0 1.25rem; }
+      .hero-inner { padding: 6rem 1.25rem 3rem; }
+      .section-inner, .footer-main { padding: 0 1.25rem; }
+      .services { padding: 4rem 0; }
+      .pricing { padding: 4rem 0; }
+      .footer-main { padding: 3rem 1.25rem; }
+      .modal-body { padding: 1rem 1.25rem 1.5rem; }
+      .modal-progress { padding: 1rem 1.25rem 0.5rem; }
+      .footer-bottom-inner { padding: 1rem 1.25rem; }
+    }
+    svg { display: inline-block; vertical-align: middle; }
+  </style>
 </head>
-<body class="min-h-screen bg-black selection-red">
+<body>
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 bg-black border-b border-zinc-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center gap-2">
-                        <span class="text-3xl font-black tracking-tighter text-white">
-                            Ubi<span class="text-red-600">Go!</span>
-                        </span>
-                    </a>
-                </div>
+<!-- ═══ NAVBAR ═══ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">Ubi<span>Go!</span></a>
+    <div class="nav-links">
+      <a href="#pide-tu-viaje">PIDE TU VIAJE</a>
+      <a href="#precios">PRECIOS</a>
+      <a href="#contacto">CONTACTO</a>
+    </div>
+    <div class="nav-actions">
+      <a href="#" class="btn-ghost">INICIAR SESIÓN</a>
+      <a href="#" class="btn-red">Registrarse</a>
+    </div>
+    <button class="nav-mobile-btn" id="mobileMenuBtn" aria-label="Menu">
+      <svg id="menuIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg id="closeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="nav-mobile-menu" id="mobileMenu">
+    <div class="nav-mobile-menu-inner">
+      <a href="#pide-tu-viaje" class="nav-mobile-link" onclick="closeMobileMenu()">Pide tu viaje <span style="color:#3f3f46;font-size:1.2rem">›</span></a>
+      <a href="#precios" class="nav-mobile-link" onclick="closeMobileMenu()">Precios <span style="color:#3f3f46;font-size:1.2rem">›</span></a>
+      <a href="#contacto" class="nav-mobile-link" onclick="closeMobileMenu()">Contacto <span style="color:#3f3f46;font-size:1.2rem">›</span></a>
+      <div class="nav-mobile-actions">
+        <button class="btn-outline-mobile">Iniciar sesión</button>
+        <button class="btn-red-mobile">Registrarse</button>
+      </div>
+    </div>
+  </div>
+</nav>
 
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center gap-8">
-                    <div class="relative group">
-                        <button class="text-white hover:text-red-500 flex items-center gap-1 transition-colors font-medium">
-                            Servicios <i data-lucide="chevron-down" size="16"></i>
-                        </button>
-                        <div class="absolute top-full left-0 hidden group-hover:block bg-black border border-zinc-800 text-white min-w-[200px] mt-2 rounded-lg overflow-hidden">
-                            <a href="#" class="px-4 py-3 hover:bg-zinc-900 flex gap-2 items-center">
-                                <i data-lucide="bike" size="18" class="text-red-600"></i> Viajes en moto
-                            </a>
-                            <a href="#" class="px-4 py-3 hover:bg-zinc-900 flex gap-2 items-center">
-                                <i data-lucide="map-pin" size="18" class="text-red-600"></i> Solicitar una moto
-                            </a>
-                            <a href="#" class="px-4 py-3 hover:bg-zinc-900 flex gap-2 items-center">
-                                <i data-lucide="calendar" size="18" class="text-red-600"></i> Reservar una moto
-                            </a>
-                            <a href="#" class="px-4 py-3 hover:bg-zinc-900 flex gap-2 items-center">
-                                <i data-lucide="dollar-sign" size="18" class="text-red-600"></i> Ver tarifas
-                            </a>
-                        </div>
-                    </div>
-                    <a href="#precios" class="text-white hover:text-red-500 transition-colors font-medium">Precios</a>
-                    <a href="#contacto" class="text-white hover:text-red-500 transition-colors font-medium">Contacto</a>
-                    <a href="#" class="text-white hover:text-red-500 font-bold px-4 py-2">INICIO DE SESIÓN</a>
-                    <button class="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2.5 font-bold transition-all">
-                        Registrarse
-                    </button>
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-glows">
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-glow-3"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-grid">
+      <!-- Image card -->
+      <div style="position:relative">
+        <div class="hero-card-glow"></div>
+        <div class="hero-card">
+          <img src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/20d9c869-8da0-4255-9e75-670095d3e726/MOTOUBIGO-1768390783964.jpg?width=800&height=560&resize=contain" alt="UbiGo Ride" />
+          <div class="hero-caption">
+            <div class="hero-caption-inner">
+              <div>
+                <p class="hero-caption-title">SIEMPRE EN<br><span>MOVIMIENTO</span></p>
+                <div class="hero-caption-sub">
+                  <div class="hero-caption-line"></div>
+                  <p class="hero-caption-label">Servicio 24 horas</p>
                 </div>
-
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden">
-                    <button id="mobile-menu-btn" class="text-white p-2">
-                        <i data-lucide="menu" size="28"></i>
-                    </button>
-                </div>
+              </div>
+              <div class="hero-live">
+                <div class="hero-live-dot"><div class="hero-live-dot-inner"></div></div>
+                <span class="hero-live-label">Live</span>
+              </div>
             </div>
+            <div class="hero-shimmer"></div>
+          </div>
         </div>
-
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-zinc-900 border-b border-zinc-800">
-            <div class="px-4 pt-2 pb-6 space-y-2">
-                <a href="#" class="block px-3 py-4 text-lg font-medium text-white border-b border-zinc-800">Viajes en moto</a>
-                <a href="#" class="block px-3 py-4 text-lg font-medium text-white border-b border-zinc-800">Solicitar una moto</a>
-                <a href="#" class="block px-3 py-4 text-lg font-medium text-white border-b border-zinc-800">Reservar una moto</a>
-                <a href="#" class="block px-3 py-4 text-lg font-medium text-white border-b border-zinc-800">Tarifas</a>
-                <a href="#contacto" class="block px-3 py-4 text-lg font-medium text-white">Contacto</a>
-                <div class="pt-4 space-y-2">
-                    <a href="#" class="block w-full border border-zinc-700 text-center text-white py-4 text-xl font-bold hover:bg-zinc-800 rounded-xl">
-                        INICIO DE SESIÓN
-                    </a>
-                    <button class="w-full bg-red-600 hover:bg-red-700 text-white py-4 text-xl font-bold rounded-xl">
-                        Registrarse
-                    </button>
-                </div>
-            </div>
+      </div>
+      <!-- Copy + booking -->
+      <div>
+        <div class="hero-badge">
+          <div class="hero-badge-dot"></div>
+          <span class="hero-badge-text">Madrid · Disponible ahora</span>
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="relative min-h-screen pt-20 flex items-center bg-black overflow-hidden">
-        <div class="absolute top-0 right-0 w-1/2 h-full bg-red-600/10 skew-x-12 transform translate-x-1/4"></div>
-        <div class="absolute bottom-0 left-0 w-64 h-64 bg-red-600/20 blur-[120px]"></div>
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h1 class="text-6xl md:text-8xl font-black text-white leading-tight mb-6">
-                        Viaja con <br />
-                        <span class="text-red-600">Libertad.</span>
-                    </h1>
-                    <p class="text-xl text-zinc-400 mb-10 max-w-lg leading-relaxed">
-                        La forma más rápida y segura de moverte por Madrid. UbiGo! te conecta con conductores en minutos.
-                    </p>
-
-                    <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md">
-                        <h3 class="text-black text-2xl font-bold mb-6 flex items-center gap-2">
-                            ¿A dónde vamos hoy?
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="relative">
-                                <i data-lucide="map-pin" class="absolute left-3 top-3.5 text-red-600" size="20"></i>
-                                <input type="text" placeholder="Ubicación de origen" class="w-full pl-10 h-14 bg-zinc-100 border-none rounded-xl text-black focus:ring-2 focus:ring-red-600 outline-none">
-                            </div>
-                            <div class="relative">
-                                <i data-lucide="navigation" class="absolute left-3 top-3.5 text-zinc-400" size="20"></i>
-                                <input type="text" placeholder="Destino" class="w-full pl-10 h-14 bg-zinc-100 border-none rounded-xl text-black focus:ring-2 focus:ring-red-600 outline-none">
-                            </div>
-                            <button class="w-full h-14 bg-black hover:bg-zinc-800 text-white font-bold text-lg rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95">
-                                Ver Precios <i data-lucide="arrow-right" size="20"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hidden lg:block relative">
-                    <div class="relative z-20 rounded-3xl overflow-hidden border-8 border-zinc-900 shadow-2xl">
-                        <img src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/20d9c869-8da0-4255-9e75-670095d3e726/MOTOUBIGO-1768390783964.jpg?width=8000&height=8000&resize=contain" alt="UbiGo Ride" class="w-full h-full object-cover">
-                    </div>
-                    <div class="absolute -bottom-10 -left-6 bg-zinc-900 text-white p-8 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-30 border border-zinc-800">
-                        <p class="text-4xl font-black italic tracking-tighter leading-none mb-3 text-red-600">SIEMPRE EN MOVIMIENTO</p>
-                        <div class="h-0.5 w-full bg-gradient-to-r from-red-600 to-transparent mb-3"></div>
-                        <p class="text-[10px] font-bold uppercase tracking-[0.4em] text-zinc-400">Servicio 24 horas</p>
-                    </div>
-                </div>
+        <h1 class="hero-h1">Viaja con<br><span class="hero-h1-gradient">Planificación.</span></h1>
+        <p class="hero-desc">La forma más segura y puntual de moverte por Madrid. Reservas anticipadas, conductores verificados.</p>
+        <div id="pide-tu-viaje" class="booking-card" style="scroll-margin-top:6rem">
+          <div class="booking-card-header">
+            <div class="booking-card-bar"></div>
+            <h3 class="booking-card-title">Pide tu viaje</h3>
+          </div>
+          <div class="booking-field">
+            <div class="booking-input-wrap">
+              <span class="booking-input-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </span>
+              <input id="heroOrigin" class="booking-input" type="text" placeholder="Ubicación de origen" />
             </div>
+          </div>
+          <div class="booking-field">
+            <div class="booking-input-wrap">
+              <span class="booking-input-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+              </span>
+              <input id="heroDestination" class="booking-input" type="text" placeholder="Destino" />
+            </div>
+          </div>
+          <div id="heroError" class="error-text" style="display:none">
+            <span class="error-dot"></span><span id="heroErrorText"></span>
+          </div>
+          <button class="btn-book" onclick="openBookingFromHero()">
+            Ver Precios
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
         </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section id="precios" class="py-24 bg-zinc-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-black text-black mb-4">Nuestras Tarifas</h2>
-                <p class="text-zinc-600 max-w-2xl mx-auto">
-                    Elige el servicio que mejor se adapte a tus necesidades en Madrid. Precios transparentes y sin sorpresas.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <!-- Basic -->
-                <div class="bg-white p-8 rounded-2xl border border-zinc-200 hover:border-red-600 transition-colors group cursor-default">
-                    <div class="bg-zinc-100 w-12 h-12 rounded-xl flex items-center justify-center mb-6 group-hover:bg-red-50 transition-colors">
-                        <i data-lucide="bike" size="24" class="text-red-600"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-black mb-2">UbiGo Basic</h3>
-                    <p class="text-zinc-500 text-sm mb-4 h-10">Viajes económicos y confiables.</p>
-                    <p class="text-3xl font-black text-black mb-6">Desde 5.00€</p>
-                    <ul class="space-y-3">
-                        <li class="text-sm text-zinc-600 flex items-center gap-2">
-                            <div class="w-1.5 h-1.5 rounded-full bg-red-600"></div>
-                            Capacidad: 1 persona
-                        </li>
-                        <li class="text-sm text-zinc-600 flex items-center gap-2">
-                            <div class="w-1.5 h-1.5 rounded-full bg-red-600"></div>
-                            Casco incluido
-                        </li>
-                        <li class="text-sm text-zinc-600 flex items-center gap-2">
-                            <div class="w-1.5 h-1.5 rounded-full bg-red-600"></div>
-                            Motos estándar
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Comfort -->
-                <div class="bg-white p-8 rounded-2xl border border-zinc-200 hover:border-red-600 transition-colors group cursor-default">
-                    <div class="bg-zinc-100 w-12 h-12 rounded-xl flex items-center justify-center mb-6 group-hover:bg-red-50 transition-colors">
-                        <i data-lucide="zap" size="24" class="text-red-600"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-black mb-2">UbiGo Comfort</h3>
-                    <p class="text-zinc-500 text-sm mb-4 h-10">Espacio extra y conductores mejor calificados.</p>
-                    <p class="text-3xl font-black text-black mb-6">Desde 8.50€</p>
-                    <ul class="space-y-3">
-                        <li class="text-sm text-zinc-600 flex items-center gap-2">
-                            <div class="w-1.5 h-1.5 rounded-full bg-red-600"></div>
-                            Capacidad: 1 persona
-                        </li>
-                        <li class="text-sm text-zinc-600 flex items-center gap-2">
-                            <div class="w-1.5 h-1.5 rounded-full bg-red-600"></div>
-                            Espacio para maleta
-                        </li>
-                        <li class="text-sm text-zinc-600 flex items-center gap-2">
-                            <div class="w-1.5 h-1.5 rounded-full bg-red-600"></div>
-                            Casco premium incluido
-                        </li>
-                    </ul>
-                </div>
-            </div>
+        <div class="trust-signals">
+          <div class="trust-item"><p class="trust-val">4.9★</p><p class="trust-label">Valoración<br>media</p></div>
+          <div class="trust-item"><p class="trust-val">24h</p><p class="trust-label">Servicio<br>continuo</p></div>
+          <div class="trust-item"><p class="trust-val">100%</p><p class="trust-label">Conductores<br>verificados</p></div>
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Footer / Contact Section -->
-    <footer id="contacto" class="bg-black text-white pt-24 pb-12 border-t border-zinc-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 mb-20">
-                <div>
-                    <h2 class="text-4xl font-black mb-6">Contacta con <span class="text-red-600">Nosotros</span></h2>
-                    <div class="mb-10 group">
-                        <p class="text-zinc-400 leading-relaxed mb-4">
-                            ¿Tienes alguna duda o necesitas ayuda con un viaje? Nuestro equipo garantiza un compromiso 24 horas.
-                        </p>
-                        <div class="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-4 py-2 rounded-full">
-                            <div class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-                            <span class="text-red-600 font-black italic text-sm tracking-widest uppercase">SIEMPRE EN MOVIMIENTO</span>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-6 mb-12">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center text-red-600">
-                                <i data-lucide="phone" size="20"></i>
-                            </div>
-                            <div>
-                                <p class="text-zinc-500 text-sm">Llámanos</p>
-                                <p class="font-bold">+1 800 UBIGO 00</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center text-red-600">
-                                <i data-lucide="mail" size="20"></i>
-                            </div>
-                            <div>
-                                <p class="text-zinc-500 text-sm">Email</p>
-                                <p class="font-bold">ubigo.madrid@gmail.com</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <button class="rounded-full w-12 h-12 flex items-center justify-center border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-colors">
-                            <i data-lucide="instagram" size="20"></i>
-                        </button>
-                        <button class="rounded-full w-12 h-12 flex items-center justify-center border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-colors">
-                            <i data-lucide="twitter" size="20"></i>
-                        </button>
-                        <button class="rounded-full w-12 h-12 flex items-center justify-center border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-colors">
-                            <i data-lucide="facebook" size="20"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-zinc-900 p-8 rounded-3xl border border-zinc-800">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <input type="text" placeholder="Nombre" class="w-full bg-black border border-zinc-700 h-14 rounded-xl px-4 text-white focus:ring-2 focus:ring-red-600 outline-none">
-                        <input type="email" placeholder="Email" class="w-full bg-black border border-zinc-700 h-14 rounded-xl px-4 text-white focus:ring-2 focus:ring-red-600 outline-none">
-                    </div>
-                    <input type="text" placeholder="Asunto" class="w-full bg-black border border-zinc-700 h-14 rounded-xl mb-4 px-4 text-white focus:ring-2 focus:ring-red-600 outline-none">
-                    <textarea placeholder="Tu mensaje..." class="w-full bg-black border border-zinc-700 min-h-[150px] rounded-xl mb-6 p-4 text-white focus:ring-2 focus:ring-red-600 outline-none"></textarea>
-                    <button class="w-full h-14 bg-red-600 hover:bg-red-700 font-bold text-lg rounded-xl transition-all text-white">
-                        Enviar Mensaje
-                    </button>
-                </div>
-            </div>
-
-            <div class="py-12 border-t border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-8">
-                <div class="flex items-center gap-6">
-                    <div class="flex items-center gap-2 text-zinc-400">
-                        <i data-lucide="shield-check" class="text-red-600"></i>
-                        <span class="text-sm font-medium">Pago 100% Seguro</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-zinc-400">
-                        <i data-lucide="lock" class="text-red-600"></i>
-                        <span class="text-sm font-medium">Encriptación SSL</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4 opacity-50 text-white">
-                    <i data-lucide="credit-card" size="32"></i>
-                    <span class="text-xl font-bold tracking-widest italic uppercase">Visa</span>
-                    <span class="text-xl font-bold tracking-widest italic uppercase">Master</span>
-                    <span class="text-xl font-bold tracking-widest italic uppercase">Amex</span>
-                </div>
-            </div>
-
-            <div class="text-center pt-8 border-t border-zinc-800 text-zinc-600 text-sm">
-                <p>© 2026 UbiGo! Inc. Todos los derechos reservados.</p>
-            </div>
+<!-- ═══ SERVICES ═══ -->
+<section id="servicios" class="services">
+  <div class="services-glow-1"></div>
+  <div class="services-glow-2"></div>
+  <div class="section-inner">
+    <div class="services-header">
+      <div class="section-badge"><div class="section-badge-dot"></div><span class="section-badge-text">Cómo funciona</span></div>
+      <h2 class="section-h2">Reserva tu transporte<br><span>con antelación</span></h2>
+      <p class="section-desc">UbiGo! se enfoca exclusivamente en el transporte de personas mediante reservas anticipadas, garantizando puntualidad y seguridad absoluta.</p>
+    </div>
+    <div class="services-grid">
+      <div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div><p class="step-title">Elige fecha y hora</p><p class="step-desc">Planifica con días de antelación o reserva para hoy mismo.</p></div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div><p class="step-title">Indica tu ruta</p><p class="step-desc">Origen y destino en Madrid. Calculamos precio al instante.</p></div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div><p class="step-title">Conductor asignado</p><p class="step-desc">Conductor verificado con rating 4.8+ confirmado para tu viaje.</p></div>
+          </div>
         </div>
-    </footer>
+        <button class="btn-book-now" onclick="openModal()">Reservar ahora →</button>
+      </div>
+      <div class="feature-cards">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <p class="feature-title">Conductores verificados</p>
+          <p class="feature-desc">Todos con antecedentes y formación certificada.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <p class="feature-title">Puntualidad garantizada</p>
+          <p class="feature-desc">Llegamos antes que tú lo necesites.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <p class="feature-title">Cobertura total Madrid</p>
+          <p class="feature-desc">Centro, barrios y área metropolitana.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="feature-title">Valoración 4.9 / 5</p>
+          <p class="feature-desc">Miles de usuarios satisfechos en Madrid.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
+<!-- ═══ PRICING ═══ -->
+<section id="precios" class="pricing">
+  <div class="section-inner">
+    <div class="pricing-header">
+      <div class="section-badge" style="margin-bottom:1.5rem"><div class="section-badge-dot"></div><span class="section-badge-text">Tarifas</span></div>
+      <h2 class="section-h2">Tarifas <span>transparentes</span></h2>
+      <p class="section-desc">Sin sorpresas. Precio fijo calculado antes de confirmar tu reserva.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card normal">
+        <div class="pricing-card-top">
+          <div class="pricing-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="2.5"/><circle cx="18.5" cy="17.5" r="2.5"/><path d="M15 6a1 1 0 000 2h1l3 7H4l2.5-7H8"/><path d="M9 6l1-3"/></svg>
+          </div>
+          <span class="pricing-tag-small">Más popular</span>
+        </div>
+        <h3 class="pricing-name">UbiGo Basic</h3>
+        <p class="pricing-desc">Viajes económicos y confiables para el día a día.</p>
+        <div class="pricing-price"><span class="pricing-price-val">Desde 5.00€</span><span class="pricing-price-unit">/ viaje</span></div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><svg class="pricing-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Capacidad: 1 persona</li>
+          <li class="pricing-feature"><svg class="pricing-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Casco incluido</li>
+          <li class="pricing-feature"><svg class="pricing-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Motos estándar</li>
+          <li class="pricing-feature"><svg class="pricing-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Reserva anticipada</li>
+        </ul>
+      </div>
+      <div class="pricing-card highlight">
+        <div class="pricing-tag">Premium</div>
+        <div class="pricing-card-top" style="margin-top:0.75rem">
+          <div class="pricing-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+        </div>
+        <h3 class="pricing-name">UbiGo Comfort</h3>
+        <p class="pricing-desc">Espacio extra y conductores mejor calificados.</p>
+        <div class="pricing-price"><span class="pricing-price-val">Desde 8.50€</span><span class="pricing-price-unit">/ viaje</span></div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><svg class="pricing-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Capacidad: 1 persona</li>
+          <li class="pricing-feature"><svg class="pricing-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Espacio para maleta</li>
+          <li class="pricing-feature"><svg class="pricing-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Casco premium incluido</li>
+          <li class="pricing-feature"><svg class="pricing-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Conductor top-rated</li>
+        </ul>
+      </div>
+    </div>
+    <p class="pricing-note">* Precio final calculado según distancia real. Consulta el estimador en el hero.</p>
+  </div>
+</section>
 
-        // Mobile Menu Toggle
-        const menuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        
-        menuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            const icon = menuBtn.querySelector('i');
-            if (mobileMenu.classList.contains('hidden')) {
-                icon.setAttribute('data-lucide', 'menu');
-            } else {
-                icon.setAttribute('data-lucide', 'x');
-            }
-            lucide.createIcons();
-        });
-    </script>
+<!-- ═══ FOOTER ═══ -->
+<footer id="contacto">
+  <div class="footer-main">
+    <div class="footer-grid">
+      <div>
+        <span class="footer-brand-name">Ubi<span>Go!</span></span>
+        <p class="footer-brand-desc">La forma más segura y puntual de moverte por Madrid. Especialistas en reservas de transporte de personas.</p>
+        <div class="footer-badge">
+          <div class="footer-badge-dot"></div>
+          <span class="footer-badge-text">Disponible 24h</span>
+        </div>
+      </div>
+      <div>
+        <h2 class="footer-contact-title">Contacta con <span>Nosotros</span></h2>
+        <div class="footer-contacts">
+          <div class="footer-contact-item">
+            <div class="footer-contact-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.39h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.88-1.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <div>
+              <p class="footer-contact-label">Llámanos</p>
+              <p class="footer-contact-value">+34 910 123 456</p>
+            </div>
+          </div>
+          <div class="footer-contact-item">
+            <div class="footer-contact-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div>
+              <p class="footer-contact-label">Email</p>
+              <p class="footer-contact-value">ubigo.madrid@gmail.com</p>
+            </div>
+          </div>
+          <div class="footer-contact-item">
+            <div class="footer-contact-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div>
+              <p class="footer-contact-label">Ciudad</p>
+              <p class="footer-contact-value">Madrid, España</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-bottom-inner">
+      <div class="footer-bottom-left">
+        <div class="footer-bottom-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          <span style="line-height:1">Pago 100% seguro</span>
+        </div>
+        <div class="footer-bottom-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span style="line-height:1">Encriptación SSL</span>
+        </div>
+      </div>
+      <div class="footer-cards"><span>VISA</span><span>MASTERCARD</span><span>AMEX</span></div>
+      <p class="footer-copy">© 2026 UbiGo! Inc.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ BOOKING MODAL ═══ -->
+<div class="modal-overlay" id="bookingModal" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modalContent">
+    <button class="modal-close" onclick="closeModal()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div id="modalInner"></div>
+  </div>
+</div>
+
+<script>
+const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+const DAYS = ["L","M","X","J","V","S","D"]
+const HOURS = ["07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00"]
+const PRICING_TIERS = [
+  { id:"basic", name:"UbiGo Basic", description:"Viajes económicos y confiables.", pricePerKm:0.85, basePrice:2.50 },
+  { id:"comfort", name:"UbiGo Comfort", description:"Espacio extra y conductores mejor calificados.", pricePerKm:1.20, basePrice:3.50 },
+]
+const DRIVERS = [
+  { name:"Carlos Martínez", photo:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face", rating:4.9, trips:1247, plate:"1234 GHT", bike:"Honda PCX 125" },
+  { name:"Miguel Ángel López", photo:"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face", rating:4.8, trips:892, plate:"5678 BCD", bike:"Yamaha NMAX 125" },
+  { name:"David García", photo:"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face", rating:4.95, trips:2103, plate:"9012 KLM", bike:"Kymco Agility 125" },
+]
+
+let state = { step:"date", calMonth:new Date().getMonth(), calYear:new Date().getFullYear(), selectedDay:null, selectedHour:null, origin:"", destination:"", priceResult:null, selectedTier:null, driver:null }
+
+// Navbar scroll
+window.addEventListener("scroll", () => { document.getElementById("navbar").classList.toggle("scrolled", window.scrollY > 20) })
+
+// Mobile menu
+document.getElementById("mobileMenuBtn").addEventListener("click", () => {
+  const isOpen = document.getElementById("mobileMenu").classList.toggle("open")
+  document.getElementById("menuIcon").style.display = isOpen ? "none" : "inline-block"
+  document.getElementById("closeIcon").style.display = isOpen ? "inline-block" : "none"
+})
+function closeMobileMenu() {
+  document.getElementById("mobileMenu").classList.remove("open")
+  document.getElementById("menuIcon").style.display = "inline-block"
+  document.getElementById("closeIcon").style.display = "none"
+}
+
+// Hero inputs
+document.getElementById("heroOrigin").addEventListener("input", () => { document.getElementById("heroError").style.display = "none" })
+document.getElementById("heroDestination").addEventListener("input", () => { document.getElementById("heroError").style.display = "none" })
+
+function openModal() {
+  state = { step:"date", calMonth:new Date().getMonth(), calYear:new Date().getFullYear(), selectedDay:null, selectedHour:null, origin:"", destination:"", priceResult:null, selectedTier:null, driver:null }
+  document.getElementById("bookingModal").classList.add("open")
+  document.body.style.overflow = "hidden"
+  renderModal()
+}
+function openBookingFromHero() {
+  const origin = document.getElementById("heroOrigin").value.trim()
+  const dest = document.getElementById("heroDestination").value.trim()
+  if (!origin || !dest) {
+    document.getElementById("heroErrorText").textContent = "Por favor, introduce origen y destino"
+    document.getElementById("heroError").style.display = "flex"
+    return
+  }
+  document.getElementById("heroError").style.display = "none"
+  state = { step:"date", calMonth:new Date().getMonth(), calYear:new Date().getFullYear(), selectedDay:null, selectedHour:null, origin, destination:dest, priceResult:null, selectedTier:null, driver:null }
+  document.getElementById("bookingModal").classList.add("open")
+  document.body.style.overflow = "hidden"
+  renderModal()
+}
+function closeModal() {
+  document.getElementById("bookingModal").classList.remove("open")
+  document.body.style.overflow = ""
+}
+function handleOverlayClick(e) { if (e.target === document.getElementById("bookingModal")) closeModal() }
+
+function renderModal() {
+  const steps = ["date","route","pricing","driver"]
+  const stepNames = ["Fecha","Ruta","Tarifa","Confirmar"]
+  const currentIdx = steps.indexOf(state.step)
+  let progressHtml = ""
+  if (state.step !== "confirmed") {
+    progressHtml = `<div class="modal-progress">
+      <div class="modal-steps">${stepNames.map((name,i) => {
+        const done = i < currentIdx, active = i === currentIdx
+        return `<div class="modal-step-item">
+          <div class="modal-step-circle ${done?'done':active?'active':'pending'}">${done?'✓':i+1}</div>
+          <span class="modal-step-label ${active?'active':'inactive'}">${name}</span>
+        </div>`
+      }).join("")}</div>
+      <div class="modal-progress-bar"><div class="modal-progress-fill" style="width:${currentIdx*33.3}%"></div></div>
+    </div>`
+  }
+  let bodyHtml = ""
+  if (state.step === "date") bodyHtml = renderDateStep()
+  else if (state.step === "route") bodyHtml = renderRouteStep()
+  else if (state.step === "pricing") bodyHtml = renderPricingStep()
+  else if (state.step === "driver") bodyHtml = renderDriverStep()
+  else if (state.step === "confirmed") bodyHtml = renderConfirmedStep()
+  document.getElementById("modalInner").innerHTML = progressHtml + `<div class="modal-body">${bodyHtml}</div>`
+}
+
+function buildCalendar() {
+  const today = new Date()
+  const first = new Date(state.calYear, state.calMonth, 1).getDay()
+  const offset = first === 0 ? 6 : first - 1
+  const total = new Date(state.calYear, state.calMonth + 1, 0).getDate()
+  const cells = Array.from({length:offset+total},(_,i)=>i<offset?null:i-offset+1)
+  return `<div class="modal-calendar">
+    <div class="modal-cal-header">
+      <button class="modal-cal-btn" onclick="calPrev()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="modal-cal-title"><p class="modal-cal-month">${MONTHS[state.calMonth]}</p><p class="modal-cal-year">${state.calYear}</p></div>
+      <button class="modal-cal-btn" onclick="calNext()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+    <div class="modal-cal-days">${DAYS.map(d=>`<div class="modal-cal-dayname">${d}</div>`).join("")}</div>
+    <div class="modal-cal-grid">${cells.map((day,i)=>{
+      if (!day) return `<div class="modal-cal-cell"></div>`
+      const isPast = new Date(state.calYear,state.calMonth,day) < new Date(today.getFullYear(),today.getMonth(),today.getDate())
+      const isTodayDay = day===today.getDate()&&state.calMonth===today.getMonth()&&state.calYear===today.getFullYear()
+      const isSel = day===state.selectedDay
+      let cls = "modal-cal-day "
+      if (isPast) cls += "past"
+      else if (isSel) cls += "selected"
+      else if (isTodayDay) cls += "today-ring available"
+      else cls += "available"
+      return `<div class="modal-cal-cell"><button class="${cls}" ${isPast?"disabled":`onclick="selectDay(${day})"`}>${day}</button></div>`
+    }).join("")}</div>
+  </div>`
+}
+
+function renderDateStep() {
+  const timepicker = state.selectedDay ? `<div class="timepicker">
+    <div class="timepicker-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="timepicker-label-text">Hora de recogida</span>
+    </div>
+    <div class="timepicker-grid">${HOURS.map(h=>`<button class="time-btn ${state.selectedHour===h?'selected':'normal'}" onclick="selectHour('${h}')">${h}</button>`).join("")}</div>
+  </div>` : ""
+  const disabled = !state.selectedDay || !state.selectedHour
+  return `<h2 class="modal-h2">¿Cuándo viajas?</h2>
+    <p class="modal-sub">Selecciona fecha y hora de recogida</p>
+    ${buildCalendar()}
+    ${timepicker}
+    <button class="btn-confirm" style="margin-top:0.75rem" onclick="goToRoute()" ${disabled?"disabled":""}>
+      Continuar
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>`
+}
+
+function renderRouteStep() {
+  return `<button class="modal-back" onclick="goToStep('date')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Volver
+  </button>
+  <h2 class="modal-h2">¿De dónde a dónde?</h2>
+  <p class="modal-sub"><strong style="color:#000">${state.selectedDay} ${MONTHS[state.calMonth]}, ${state.calYear}</strong>${state.selectedHour?` · <strong style="color:#dc2626">${state.selectedHour}</strong>`:""}</p>
+  <div class="route-input-wrap">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    <input class="route-input" id="modalOrigin" type="text" placeholder="Ubicación de origen" value="${state.origin}" oninput="state.origin=this.value" />
+  </div>
+  <div class="route-input-wrap">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+    <input class="route-input" id="modalDest" type="text" placeholder="Destino" value="${state.destination}" oninput="state.destination=this.value" />
+  </div>
+  <div id="modalRouteError" class="error-text" style="display:none"><span class="error-dot"></span><span id="modalRouteErrorText"></span></div>
+  <button class="btn-confirm" id="calcBtn" onclick="calculatePrices()">
+    <span id="calcBtnText">Ver Precios</span>
+    <svg id="calcBtnIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-left:6px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    <svg id="calcBtnSpinner" class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;margin-left:6px"><circle cx="12" cy="12" r="10" opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" opacity="0.75"/></svg>
+  </button>`
+}
+
+function renderPricingStep() {
+  const r = state.priceResult
+  return `<button class="modal-back" onclick="goToStep('route')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Volver
+  </button>
+  <h2 class="modal-h2">Elige tu tarifa</h2>
+  <p class="modal-sub">${state.selectedDay} ${MONTHS[state.calMonth]}${state.selectedHour?` · <strong style="color:#dc2626">${state.selectedHour}</strong>`:""} · ${state.origin} → ${state.destination.split(",")[0]}</p>
+  <div class="modal-stats">
+    <div class="modal-stat red"><p class="modal-stat-val">${r.distance} km</p><p class="modal-stat-label">Distancia</p></div>
+    <div class="modal-stat gray"><p class="modal-stat-val">${r.duration} min</p><p class="modal-stat-label">Duración</p></div>
+  </div>
+  ${r.prices.map(tier => {
+    const isBasic = tier.id==="basic"
+    const icon = isBasic
+      ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="5.5" cy="17.5" r="2.5"/><circle cx="18.5" cy="17.5" r="2.5"/><path d="M15 6a1 1 0 000 2h1l3 7H4l2.5-7H8"/></svg>`
+      : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`
+    return `<div class="tier-option" onclick="selectTier('${tier.id}','${tier.name}',${tier.price})">
+      <div class="tier-option-left">
+        <div class="tier-icon">${icon}</div>
+        <div><p class="tier-name">${tier.name}</p><p class="tier-desc">${PRICING_TIERS.find(t=>t.id===tier.id)?.description}</p></div>
+      </div>
+      <p class="tier-price">${tier.price.toFixed(2)}€</p>
+    </div>`
+  }).join("")}
+  <p style="font-size:0.75rem;color:#a1a1aa;text-align:center;margin-top:1rem">Precios estimados. El precio final puede variar según el tráfico.</p>`
+}
+
+function renderDriverStep() {
+  const d = state.driver, t = state.selectedTier, r = state.priceResult
+  const icon = t.id==="basic"
+    ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="5.5" cy="17.5" r="2.5"/><circle cx="18.5" cy="17.5" r="2.5"/><path d="M15 6a1 1 0 000 2h1l3 7H4l2.5-7H8"/></svg>`
+    : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`
+  return `<button class="modal-back" onclick="goToStep('pricing')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Volver
+  </button>
+  <h2 class="modal-h2">Tu conductor</h2>
+  <p class="modal-sub">Listo para llevarte a tu destino</p>
+  <div class="driver-card">
+    <div class="driver-top">
+      <img class="driver-avatar" src="${d.photo}" alt="${d.name}" />
+      <div>
+        <p class="driver-name">${d.name}</p>
+        <div class="driver-rating">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span class="driver-rating-val">${d.rating}</span>
+          <span class="driver-rating-trips">(${d.trips} viajes)</span>
+        </div>
+      </div>
+    </div>
+    <div class="driver-plates">
+      <div class="driver-plate-box"><p class="driver-plate-label">Matrícula</p><p class="driver-plate-val">${d.plate}</p></div>
+      <div class="driver-plate-box"><p class="driver-plate-label">Vehículo</p><p class="driver-plate-val small">${d.bike}</p></div>
+    </div>
+  </div>
+  <div class="summary-box">
+    <div>
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:2px;line-height:0">${icon}<p class="summary-name">${t.name}</p></div>
+      <p class="summary-meta">${state.selectedDay} ${MONTHS[state.calMonth]}${state.selectedHour?` · ${state.selectedHour}`:""} · ${r.distance} km · ${r.duration} min</p>
+    </div>
+    <p class="summary-price">${t.price.toFixed(2)}€</p>
+  </div>
+  <button class="btn-confirm" onclick="confirmTrip()">Confirmar Viaje</button>
+  <p class="modal-disclaimer">Al confirmar, aceptas nuestros términos y condiciones</p>`
+}
+
+function renderConfirmedStep() {
+  const d = state.driver
+  return `<div class="confirmed-wrap">
+    <div class="confirmed-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2 class="confirmed-h2">¡Reserva Confirmada!</h2>
+    <p class="confirmed-sub">Tu transporte ha sido programado</p>
+    <p class="confirmed-date">${state.selectedDay} ${MONTHS[state.calMonth]}, ${state.calYear}${state.selectedHour?` · ${state.selectedHour}`:""}</p>
+    ${d?`<div class="confirmed-driver">
+      <img class="confirmed-driver-avatar" src="${d.photo}" alt="${d.name}" />
+      <div><p class="confirmed-driver-name">${d.name}</p><p class="confirmed-driver-plate">${d.plate}</p></div>
+    </div>`:""}
+    <p class="confirmed-note">Recibirás un recordatorio <strong>15 min antes</strong> de la recogida.</p>
+    <button class="btn-close-modal" onclick="closeModal()">Cerrar</button>
+  </div>`
+}
+
+function calPrev() {
+  if (state.calMonth===0){state.calMonth=11;state.calYear--}else state.calMonth--
+  renderModal()
+}
+function calNext() {
+  if (state.calMonth===11){state.calMonth=0;state.calYear++}else state.calMonth++
+  renderModal()
+}
+function selectDay(d) { state.selectedDay=d; renderModal() }
+function selectHour(h) { state.selectedHour=h; renderModal() }
+function goToRoute() { if (!state.selectedDay||!state.selectedHour) return; state.step="route"; renderModal() }
+function goToStep(s) { state.step=s; renderModal() }
+
+async function calculatePrices() {
+  const origin = document.getElementById("modalOrigin")?.value||state.origin
+  const dest = document.getElementById("modalDest")?.value||state.destination
+  state.origin=origin; state.destination=dest
+  if (!origin.trim()||!dest.trim()) {
+    document.getElementById("modalRouteError").style.display="flex"
+    document.getElementById("modalRouteErrorText").textContent="Introduce origen y destino"
+    return
+  }
+  document.getElementById("calcBtnText").textContent="Calculando..."
+  document.getElementById("calcBtnIcon").style.display="none"
+  document.getElementById("calcBtnSpinner").style.display="inline"
+  document.getElementById("calcBtn").disabled=true
+  try {
+    const res = await fetch(`/api/calculate-distance?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}`)
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error||"Error al calcular")
+    const distKm = data.distance/1000
+    const durMin = Math.round(data.duration/60)
+    const displayDist = distKm<10?Math.round(distKm*10)/10:Math.round(distKm)
+    state.priceResult = {
+      distance: displayDist, duration: durMin,
+      prices: PRICING_TIERS.map(t=>({id:t.id,name:t.name,price:Math.round((t.basePrice+distKm*t.pricePerKm)*100)/100}))
+    }
+    state.step="pricing"; renderModal()
+  } catch(e) {
+    if (document.getElementById("modalRouteError")) {
+      document.getElementById("modalRouteError").style.display="flex"
+      document.getElementById("modalRouteErrorText").textContent=e.message||"Error al calcular"
+      document.getElementById("calcBtnText").textContent="Ver Precios"
+      document.getElementById("calcBtnIcon").style.display="inline"
+      document.getElementById("calcBtnSpinner").style.display="none"
+      document.getElementById("calcBtn").disabled=false
+    }
+  }
+}
+function selectTier(id,name,price) {
+  state.selectedTier={id,name,price}
+  state.driver=DRIVERS[Math.floor(Math.random()*DRIVERS.length)]
+  state.step="driver"; renderModal()
+}
+function confirmTrip() { state.step="confirmed"; renderModal() }
+</script>
 </body>
 </html>
