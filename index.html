@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UbiGo! - Viaja con Planificación</title>
+  <!-- Google Maps Places API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEockyTuhLzf1PMVNZ0HfOIEGqP9SwruM&libraries=places&language=es&region=ES"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -1121,6 +1123,44 @@ function selectTier(id,name,price) {
   state.step="driver"; renderModal()
 }
 function confirmTrip() { state.step="confirmed"; renderModal() }
+
+// ── GOOGLE MAPS AUTOCOMPLETE ──────────────────────────
+function initAutocomplete(input) {
+  if (!window.google?.maps?.places) return
+  const ac = new google.maps.places.Autocomplete(input, {
+    componentRestrictions: { country: "es" },
+    fields: ["formatted_address", "name"],
+    types: ["geocode", "establishment"]
+  })
+  ac.addListener("place_changed", () => {
+    const place = ac.getPlace()
+    input.value = place.formatted_address || place.name || input.value
+    // sync state if it's a modal input
+    if (input.id === "modalOrigin") state.origin = input.value
+    if (input.id === "modalDest") state.destination = input.value
+  })
+}
+
+function setupAutocompletes() {
+  initAutocomplete(document.getElementById("heroOrigin"))
+  initAutocomplete(document.getElementById("heroDestination"))
+}
+
+// Init on load (script is synchronous so google is ready)
+window.addEventListener("load", setupAutocompletes)
+
+// Re-attach autocomplete after modal renders new inputs
+const _origRenderModal = renderModal
+window.renderModal = function() {
+  _origRenderModal()
+  // Give the DOM a tick to paint, then wire up any new inputs
+  setTimeout(() => {
+    const mo = document.getElementById("modalOrigin")
+    const md = document.getElementById("modalDest")
+    if (mo) initAutocomplete(mo)
+    if (md) initAutocomplete(md)
+  }, 50)
+}
 </script>
 </body>
 </html>
