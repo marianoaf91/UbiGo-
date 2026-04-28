@@ -881,10 +881,54 @@ function openBookingFromHero() {
     return
   }
   document.getElementById("heroError").style.display = "none"
-  state = { step:"date", calMonth:new Date().getMonth(), calYear:new Date().getFullYear(), selectedDay:null, selectedHour:null, origin, destination:dest, priceResult:null, selectedTier:null, driver:null }
-  document.getElementById("bookingModal").classList.add("open")
-  document.body.style.overflow = "hidden"
-  renderModal()
+
+  // Mostrar loading en el botón
+  const btn = document.querySelector(".btn-book")
+  btn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" opacity="0.75"/></svg> Calculando...`
+  btn.disabled = true
+
+  // Calcular distancia con Google Maps Distance Matrix
+  const service = new google.maps.DistanceMatrixService()
+  service.getDistanceMatrix({
+    origins: [origin],
+    destinations: [dest],
+    travelMode: google.maps.TravelMode.DRIVING,
+    region: "ES"
+  }, (res, status) => {
+    btn.innerHTML = `Ver Precios <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`
+    btn.disabled = false
+
+    let distKm, durMin
+    if (status === "OK" && res.rows[0].elements[0].status === "OK") {
+      const el = res.rows[0].elements[0]
+      distKm = el.distance.value / 1000
+      durMin = Math.round(el.duration.value / 60)
+    } else {
+      // Fallback: estimación aproximada
+      distKm = 5
+      durMin = 15
+    }
+
+    const displayDist = distKm < 10 ? Math.round(distKm * 10) / 10 : Math.round(distKm)
+    const priceResult = {
+      distance: displayDist,
+      duration: durMin,
+      prices: PRICING_TIERS.map(t => ({ id: t.id, name: t.name, price: Math.round((t.basePrice + distKm * t.pricePerKm) * 100) / 100 }))
+    }
+
+    // Abrir modal directo en paso "pricing" (sin calendario)
+    state = {
+      step: "pricing",
+      calMonth: new Date().getMonth(), calYear: new Date().getFullYear(),
+      selectedDay: null, selectedHour: null,
+      origin, destination: dest,
+      priceResult, selectedTier: null, driver: null,
+      fromHero: true
+    }
+    document.getElementById("bookingModal").classList.add("open")
+    document.body.style.overflow = "hidden"
+    renderModal()
+  })
 }
 function closeModal() {
   document.getElementById("bookingModal").classList.remove("open")
@@ -897,7 +941,7 @@ function renderModal() {
   const stepNames = ["Fecha","Ruta","Tarifa","Confirmar"]
   const currentIdx = steps.indexOf(state.step)
   let progressHtml = ""
-  if (state.step !== "confirmed") {
+  if (state.step !== "confirmed" && !state.fromHero) {
     progressHtml = `<div class="modal-progress">
       <div class="modal-steps">${stepNames.map((name,i) => {
         const done = i < currentIdx, active = i === currentIdx
@@ -989,11 +1033,15 @@ function renderRouteStep() {
 
 function renderPricingStep() {
   const r = state.priceResult
-  return `<button class="modal-back" onclick="goToStep('route')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Volver
-  </button>
+  const backBtn = state.fromHero
+    ? `<button class="modal-back" onclick="closeModal()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Volver</button>`
+    : `<button class="modal-back" onclick="goToStep('route')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Volver</button>`
+  const routeSub = state.fromHero
+    ? `<p class="modal-sub">${state.origin} → ${state.destination.split(",")[0]}</p>`
+    : `<p class="modal-sub">${state.selectedDay} ${MONTHS[state.calMonth]}${state.selectedHour?` · <strong style="color:#dc2626">${state.selectedHour}</strong>`:""} · ${state.origin} → ${state.destination.split(",")[0]}</p>`
+  return `${backBtn}
   <h2 class="modal-h2">Elige tu tarifa</h2>
-  <p class="modal-sub">${state.selectedDay} ${MONTHS[state.calMonth]}${state.selectedHour?` · <strong style="color:#dc2626">${state.selectedHour}</strong>`:""} · ${state.origin} → ${state.destination.split(",")[0]}</p>
+  ${routeSub}
   <div class="modal-stats">
     <div class="modal-stat red"><p class="modal-stat-val">${r.distance} km</p><p class="modal-stat-label">Distancia</p></div>
     <div class="modal-stat gray"><p class="modal-stat-val">${r.duration} min</p><p class="modal-stat-label">Duración</p></div>
@@ -1044,7 +1092,7 @@ function renderDriverStep() {
   <div class="summary-box">
     <div>
       <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:2px;line-height:0">${icon}<p class="summary-name">${t.name}</p></div>
-      <p class="summary-meta">${state.selectedDay} ${MONTHS[state.calMonth]}${state.selectedHour?` · ${state.selectedHour}`:""} · ${r.distance} km · ${r.duration} min</p>
+      <p class="summary-meta">${state.fromHero ? "" : `${state.selectedDay} ${MONTHS[state.calMonth]}${state.selectedHour?` · ${state.selectedHour}`:""} · `}${r.distance} km · ${r.duration} min</p>
     </div>
     <p class="summary-price">${t.price.toFixed(2)}€</p>
   </div>
@@ -1060,7 +1108,7 @@ function renderConfirmedStep() {
     </div>
     <h2 class="confirmed-h2">¡Reserva Confirmada!</h2>
     <p class="confirmed-sub">Tu transporte ha sido programado</p>
-    <p class="confirmed-date">${state.selectedDay} ${MONTHS[state.calMonth]}, ${state.calYear}${state.selectedHour?` · ${state.selectedHour}`:""}</p>
+    <p class="confirmed-date">${state.fromHero ? "Reserva inmediata" : `${state.selectedDay} ${MONTHS[state.calMonth]}, ${state.calYear}${state.selectedHour?` · ${state.selectedHour}`:""}`}</p>
     ${d?`<div class="confirmed-driver">
       <img class="confirmed-driver-avatar" src="${d.photo}" alt="${d.name}" />
       <div><p class="confirmed-driver-name">${d.name}</p><p class="confirmed-driver-plate">${d.plate}</p></div>
