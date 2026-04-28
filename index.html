@@ -1131,7 +1131,7 @@ function selectHour(h) { state.selectedHour=h; renderModal() }
 function goToRoute() { if (!state.selectedDay||!state.selectedHour) return; state.step="route"; renderModal() }
 function goToStep(s) { state.step=s; renderModal() }
 
-async function calculatePrices() {
+function calculatePrices() {
   const origin = document.getElementById("modalOrigin")?.value||state.origin
   const dest = document.getElementById("modalDest")?.value||state.destination
   state.origin=origin; state.destination=dest
@@ -1144,28 +1144,29 @@ async function calculatePrices() {
   document.getElementById("calcBtnIcon").style.display="none"
   document.getElementById("calcBtnSpinner").style.display="inline"
   document.getElementById("calcBtn").disabled=true
-  try {
-    const res = await fetch(`/api/calculate-distance?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}`)
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error||"Error al calcular")
-    const distKm = data.distance/1000
-    const durMin = Math.round(data.duration/60)
+
+  const service = new google.maps.DistanceMatrixService()
+  service.getDistanceMatrix({
+    origins: [origin],
+    destinations: [dest],
+    travelMode: google.maps.TravelMode.DRIVING,
+    region: "ES"
+  }, (res, status) => {
+    let distKm, durMin
+    if (status === "OK" && res.rows[0].elements[0].status === "OK") {
+      const el = res.rows[0].elements[0]
+      distKm = el.distance.value / 1000
+      durMin = Math.round(el.duration.value / 60)
+    } else {
+      distKm = 5; durMin = 15
+    }
     const displayDist = distKm<10?Math.round(distKm*10)/10:Math.round(distKm)
     state.priceResult = {
       distance: displayDist, duration: durMin,
       prices: PRICING_TIERS.map(t=>({id:t.id,name:t.name,price:Math.round((t.basePrice+distKm*t.pricePerKm)*100)/100}))
     }
     state.step="pricing"; renderModal()
-  } catch(e) {
-    if (document.getElementById("modalRouteError")) {
-      document.getElementById("modalRouteError").style.display="flex"
-      document.getElementById("modalRouteErrorText").textContent=e.message||"Error al calcular"
-      document.getElementById("calcBtnText").textContent="Ver Precios"
-      document.getElementById("calcBtnIcon").style.display="inline"
-      document.getElementById("calcBtnSpinner").style.display="none"
-      document.getElementById("calcBtn").disabled=false
-    }
-  }
+  })
 }
 function selectTier(id,name,price) {
   state.selectedTier={id,name,price}
